@@ -1,0 +1,10 @@
+punta_espina_dorsal
+esq_izq_caparaza
+superior_ojo
+inferior_ojo
+derecha_ojo
+izquierda_ojo
+organo_dorsal
+
+
+
