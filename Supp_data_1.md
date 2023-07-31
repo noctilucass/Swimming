@@ -1,7 +1,7 @@
 ---
 title: Supplementary data 1
 subtitle: "Reproducible report"
-author: Lucas Bravo<sup>1</sup>, Milena Cano<sup>1</sup>, Mauricio F. Landaeta<sup>2,3</sup>, Sergio Navarrete<sup>4,5</sup>, Simone Baldanzi<sup>1,2</sup>
+author: Lucas Bravo<sup>1</sup>, Milena Cano<sup>1</sup>, Mauricio F. Landaeta<sup>2,3</sup>, Sergio Navarrete<sup>4,5,6</sup>, Simone Baldanzi<sup>1,2</sup>
 output: 
  html_document:
    keep_md: yes
@@ -25,14 +25,17 @@ Pontificia Universidad Católica de Chile, Las Cruces, Chile.
 COPAS COASTAL, Instituto Milenio en Socioecología Costera, SECOS,
 Pontificia Universidad Católica de Chile, Santiago, Chile.
 
+<sup>6</sup> Center for Oceanographic Research COPAS Coastal, Universidad de Concepción, Chile 
+
+
+
 This document reproduces and supports all data work and statistical
 analysis of the larval survival, geometric morphometrics and swimming
-activity in the paper **"The effect of rearing temperatures on the
-swimming performance, survival and morphometrics changes of zoea 1
-*Taliepus dentatus*"**.
+activity in the paper **"Assessing the effect of temperature variability
+on the swimming performance, survival and morphometrics of zoea larvae
+of the kelp crab *Taliepus dentatus*"**.
 
 # Libraries
-
 
 
 
@@ -75,7 +78,6 @@ library(sjPlot)
 library(multcomp)
 library(rlist)
 ```
-
 
 # Timeseries of environmental temperature
 
@@ -135,8 +137,6 @@ ggplot(Day_temp, aes(x=Date, y=mean_temp)) + geom_point() + geom_line()+ theme_b
 ```
 
 ![](Supp_data_1_files/figure-html/Timeseries_temp-1.png)<!-- -->
-
-
 
 # Mortality
 
@@ -414,7 +414,6 @@ curve<- matrix(c(curve.v3,curve.v2, curve.v1), ncol = 3)
 #digitizeImages(image.file="morphometric larva/ZOEA1_FOTOS/15°C", landmarks.ref="morphometric larva/landmarks.txt", curves.ref = curve, shapes.file ="morphometric larva/zoea1")
 #digitizeImages(image.file="morphometric larva/ZOEA1_FOTOS/17°C", landmarks.ref="morphometric larva/landmarks.txt", curves.ref = curve, shapes.file ="morphometric larva/zoea1")
 ```
-
 
 ## 1. Import Digitized pictures, grouping files and links for landmarks
 
