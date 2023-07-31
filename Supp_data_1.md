@@ -2,12 +2,9 @@
 title: Supplementary data 1
 subtitle: "Reproducible report"
 author: Lucas Bravo<sup>1</sup>, Milena Cano<sup>1</sup>, Mauricio F. Landaeta<sup>2,3</sup>, Sergio Navarrete<sup>4,5</sup>, Simone Baldanzi<sup>1,2</sup>
-output:
-  html_document:
-    css: style.css
-    toc: true
-    toc_float: true
-    keep_md: yes
+output: 
+ html_document:
+   keep_md: yes
 ---
 
 <sup>1</sup> Laboratorio de Ecofisiología y Ecología Evolutiva Marina
@@ -52,6 +49,8 @@ library(Rmisc)
 library(survminer)
 library(survival)
 library(MASS)
+library(here)
+
 
 #Morphometrics Libraries 
 library(Morpho)
@@ -77,12 +76,12 @@ library(multcomp)
 library(rlist)
 ```
 
-------------------------------------------------------------------------
+
 # Timeseries of environmental temperature
 
 
 ```r
-montemar<-read.table("~/desktop/ECOLAB!/MEDICIONES MONTEMAR 2021-2022/miniDOT.dat", header = FALSE)
+montemar<-read.table(here("Montemar-minidot", "miniDOT.dat"))
 
 #MAKING DATETIME COLUMN and ADDING COLUMNS GROUPS
 montemar_date <- montemar %>%
@@ -100,6 +99,7 @@ Day_temp<-montemar_date %>%
   dplyr::summarize(mean_temp = mean(V6), SD=sd(V6))  
 Day_temp<-Day_temp %>% mutate(Date = make_date(year, month, day))
 Day_temp<-Day_temp[1:365,] #RUN TO TAKE ONLY FIRST YEAR (2021 JAN-2022 JAN)
+Day_temp$month<-as.factor(Day_temp$month)
 
 #mean temperature by month
 Month_temp <- montemar_date %>% 
@@ -124,21 +124,17 @@ Month_temp
 ##  8  2021     8      12.5 0.198  4464
 ##  9  2021     9      12.5 0.410  4320
 ## 10  2021    10      12.2 0.644  4464
-## # … with 12 more rows
+## # ℹ 12 more rows
 ```
 
 ```r
-ggplot(Day_temp, aes(x=Date, y=mean_temp)) + geom_point() + geom_line()+ theme_bw() + scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") + 
+ggplot(Day_temp, aes(x=Date, y=mean_temp)) + geom_point() + geom_line()+ theme_bw() + scale_x_date(date_labels = "%b", date_breaks = "1 month") + 
   geom_errorbar(aes(ymin=Day_temp$mean_temp-SD, ymax=Day_temp$mean_temp+SD), 
                 width=.2, position=position_dodge(0.05),alpha=0.5) +
-  labs(y="Temperature (C°)")+ theme(plot.margin = margin(0.2,0.5,0.2,0.2, "cm"))
+  labs(y="Temperature (C°)")+ theme(plot.margin = margin(0.2,0.5,0.2,0.2, "cm")) + labs(x=element_blank())
 ```
 
 ![](Supp_data_1_files/figure-html/Timeseries_temp-1.png)<!-- -->
-
-```r
-ggsave(device = "png",filename = "montemar_21-22.png", dpi = 600, width=8, height=3)
-```
 
 
 
@@ -148,8 +144,8 @@ ggsave(device = "png",filename = "montemar_21-22.png", dpi = 600, width=8, heigh
 
 
 ```r
-#data are available in the online version of the article, write your own filepath
-Mort<-read.delim("~/Desktop/ECOLAB!/paper tesis/mortalidad/mort.txt")
+#data are available in the online version of the article, remember to import environment 
+Mort <- read.delim(here::here("mortality/mort.txt"))
 Mort$bino<-Mort$alive/100
 
 #Temperature as factor
@@ -393,7 +389,7 @@ ggsurvplot(sfit, conf.int=TRUE, pval=TRUE, risk.table=FALSE,
            legend.labs=c("12°C", "15°C","17°C"),
            legend.title="Temperature",  
            palette=(c("blue", "orange", "red")), 
-           risk.table.height=.15, ylab="Survival (%)", xlab="Day")
+           risk.table.height=.15, ylab="Survival", xlab="Day")
 ```
 
 ![](Supp_data_1_files/figure-html/KAP_MEI-1.png)<!-- -->
@@ -424,8 +420,8 @@ curve<- matrix(c(curve.v3,curve.v2, curve.v1), ncol = 3)
 
 
 ```r
-#data are available in the online version of the article, write your own filepath
-DIGIDAT<-readShapes("/Users/lucasb/Desktop/ECOLAB!/paper tesis/morphometric larva/zoea1")
+#data are available in the online version of the article, remember to import environment 
+DIGIDAT<-readShapes(here::here("morphometric/zoea1"))
 
 # Telling R the database is from steremorph
 array_data<-readland.shapes(DIGIDAT, nCurvePts= c(7,7))
@@ -470,7 +466,7 @@ linksgeo<-as.matrix(linksgeo)
 GPA<- gpagen(array_data,ProcD=FALSE, print.progress = FALSE, curves=array_data$curves) 
 #procD=false, bending energy is the correct criterion for optimizing the positions of semilandmarks
 
-gdf<- geomorph.data.frame(GPA, Temp=traitF$Temp, hours= traitF$Hours, replica=traitF$Replica, Day=traitF$Day)
+gdf<- geomorph.data.frame(GPA, Temp=traitF$Temp, replica=traitF$Replica)
 ```
 
 ## 3. Principal Components Analysis (PCA)
@@ -547,6 +543,7 @@ summary(PCA)
 ```r
 # Principal components analysis by replica
 AnError<-procD.lm(coords~replica, data = gdf, iter = 999, RRPP = TRUE)
+
 summary(AnError)
 ```
 
@@ -593,7 +590,7 @@ df_out <- as.data.frame(PCA$x)
 
 # ggplot for the PC1 and PC2
 PCA1<-ggplot(data=df_out, aes(x=Comp1, y=Comp2, col=
-                          gdf$Temp)) + geom_point(size=3, show.legend = FALSE) + theme_light() + labs(x="PC1=34.4%", y="PC2=20.6%") + scale_color_manual(values =c("blue","orange", "red")) + theme(text = element_text(size = 20))
+                          gdf$Temp)) + geom_point(size=3, show.legend = FALSE) + theme_light() + labs(x="PC1=34.4%", y="PC2=20.6%") + scale_color_manual(values =c("blue","orange", "red"))
 PCA1
 ```
 
@@ -607,48 +604,30 @@ with their explained variance (%)*
 # Plots of the mean shape (grey) against mínimum shape (black) of PC1 (with default magnification=1)
 plotRefToTarget(msh, PCA$shapes$shapes.comp1$min, method =  "points", 
                 links = linksgeo)
-```
 
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-2-1.png)<!-- -->
-
-```r
 # Plots of the mean shape (grey) against maximum shape (black) of PC1 (with default magnification=1)
 plotRefToTarget(msh, PCA$shapes$shapes.comp1$max,method = "points", 
                 links = linksgeo)
-```
 
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-2-2.png)<!-- -->
-
-```r
 # Plots of the mean shape (grey) against mínimum shape (black) of PC2 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp2$min, method =  "points", axes = T,links = linksgeo)
-```
+plotRefToTarget(msh, PCA$shapes$shapes.comp2$min, method =  "points", 
+                links = linksgeo)
 
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-2-3.png)<!-- -->
-
-```r
 # Plots of the mean shape (grey) against maximum shape (black) of PC2 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp2$max,method = "points", links = linksgeo)
+plotRefToTarget(msh, PCA$shapes$shapes.comp2$max,method = "points", 
+                links = linksgeo)
 ```
-
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-2-4.png)<!-- -->
 
 
 ```r
 # ggplot for the PC1 and PC3
 PCA2<-ggplot(data=df_out, aes(x=Comp1, y=Comp3, col=
       gdf$Temp))+geom_point(size=3) + theme_light() +
-  labs(x="PC1=34.4%", y="PC3=14.6%", shape="Day", col="Temperature")+ scale_color_manual(values =c("blue", "orange", "red")) + theme(text = element_text(size = 20), legend.position ='none')
+  labs(x="PC1=34.4%", y="PC3=14.6%", shape="Day", col="Temperature")+ scale_color_manual(values =c("blue", "orange", "red"))
 PCA2
 ```
 
 ![](Supp_data_1_files/figure-html/PC1-3_plot-1.png)<!-- -->
-
-```r
-ggarrange(PCA1,PCA2,common.legend = TRUE, legend = "bottom")
-```
-
-![](Supp_data_1_files/figure-html/PC1-3_plot-2.png)<!-- -->
 
 *Fig 3b. First (PC1) and second (PC3) principal components distribution
 with their explained variance (%)*
@@ -658,33 +637,19 @@ with their explained variance (%)*
 # Plots of the mean shape (grey) against mínimum shape (black) of PC1 (with default magnification=1)
 plotRefToTarget(msh, PCA$shapes$shapes.comp1$min, method =  "points",
                 links = linksgeo)
-```
 
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-3-1.png)<!-- -->
-
-```r
 # Plots of the mean shape (grey) against maximum shape (black) of PC1 (with default magnification=1)
 plotRefToTarget(msh, PCA$shapes$shapes.comp1$max,method = "points",
                 links = linksgeo)
-```
 
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-3-2.png)<!-- -->
-
-```r
 # Plots of the mean shape (grey) against mínimum shape (black) of PC3 (with default magnification=1)
 plotRefToTarget(msh, PCA$shapes$shapes.comp3$min, method =  "points",
                 links = linksgeo)
-```
 
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-3-3.png)<!-- -->
-
-```r
 # Plots of the mean shape (grey) against maximum shape (black) of PC3 (with default magnification=1)
 plotRefToTarget(msh, PCA$shapes$shapes.comp3$max,method = "points",
                 links = linksgeo)
 ```
-
-![](Supp_data_1_files/figure-html/Shp_plot_pc1-3-4.png)<!-- -->
 
 ## 4. Canonical Variance Analysis (CVA)
 
@@ -694,8 +659,7 @@ plotRefToTarget(msh, PCA$shapes$shapes.comp3$max,method = "points",
 traitF$grouppp<-paste(traitF$Temp, traitF$Day)
 
 # Canonical variance analysis using bonferroni p-value adjustment 
-cva1<-CVA(GPA$coords, groups = traitF$grouppp, p.adjust.method = "bonferroni"
-          , rounds = 1000, robust = "classical")
+cva1<-CVA(GPA$coords, groups = traitF$Temp, p.adjust.method = "bonferroni",rounds = 1000, robust = "classical")
 ```
 
 ```
@@ -708,9 +672,9 @@ cva1<-CVA(GPA$coords, groups = traitF$grouppp, p.adjust.method = "bonferroni"
 ```
 
 ```
-##       12 1  15 1
-## 15 1 0.003      
-## 17 1 0.096 0.003
+##             12          15
+## 15 0.002997003            
+## 17 0.095904096 0.002997003
 ```
 
 ```r
@@ -719,10 +683,39 @@ cva1<-CVA(GPA$coords, groups = traitF$grouppp, p.adjust.method = "bonferroni"
 ```
 
 ```
-##            12 1       15 1
-## 15 1 0.06321077           
-## 17 1 0.03565455 0.04666779
+##            12         15
+## 15 0.06321077           
+## 17 0.03565455 0.04666779
 ```
+
+```r
+Cva_out<-as.data.frame(cva1$CVscores)
+consensus<-as.data.frame(cva1$groupmeans)
+Cva_out$temp<-gdf$Temp
+
+ggplot(data=Cva_out, aes(x=`CV 1`, y=`CV 2`, col=temp)) + geom_point() + stat_ellipse(level = 0.95) + coord_fixed() +
+labs(x="Canonical variable 1 (76.4%)", y= "Canonical variable 2 (23.6%)", col= "Temperature") + theme_classic() + scale_color_manual(values =c("blue", "orange", "red"), labels=c("12°C","15°C","17°C"))
+```
+
+![](Supp_data_1_files/figure-html/CVA-1.png)<!-- -->
+
+```r
+plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,1], method ="points", links = linksgeo, axes = TRUE, label = FALSE, gridPars = gridPar(tar.pt.bg = "blue", tar.link.col="blue",tar.link.lwd=2, link.col = "grey", pt.bg = "grey", link.lwd = 2, pt.size = 1, tar.pt.size = 1.5))
+```
+
+![](Supp_data_1_files/figure-html/CVA-2.png)<!-- -->
+
+```r
+plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,2], method ="points", links = linksgeo, axes = TRUE, label = FALSE, gridPars = gridPar(tar.pt.bg = "orange", tar.link.col="orange",tar.link.lwd=2, link.col = "grey", pt.bg = "grey", link.lwd = 2, pt.size = 1, tar.pt.size = 1.5))
+```
+
+![](Supp_data_1_files/figure-html/CVA-3.png)<!-- -->
+
+```r
+plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,3], method ="points", links = linksgeo, axes = TRUE, label = FALSE, gridPars = gridPar(tar.pt.bg = "red", tar.link.col="red",tar.link.lwd=2, link.col = "grey", pt.bg = "grey", link.lwd = 2, pt.size = 1, tar.pt.size = 1.5))
+```
+
+![](Supp_data_1_files/figure-html/CVA-4.png)<!-- -->
 
 ------------------------------------------------------------------------
 
@@ -732,8 +725,8 @@ cva1<-CVA(GPA$coords, groups = traitF$grouppp, p.adjust.method = "bonferroni"
 
 
 ```r
-#data are available in the online version of the article, write your own filepath
-list_of_files <- list.files(path = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/swimming R/NEW TRIAL/data", recursive = TRUE,pattern = "\\.txt$", full.names = TRUE)
+#data are available in the online version of the article, remember to import environment 
+list_of_files <- list.files(path = here::here("swimming R/NEW TRIAL/data"), recursive = TRUE,pattern = "\\.txt$", full.names = TRUE)
 
 #Lapply allows to import all the files in one list
 loop_full<-lapply(list_of_files, read.delim2)
@@ -761,11 +754,12 @@ mean_t1_12[[i]]<-z1
 }
 names(mean_t1_12)<-list_of_files[1:14] #rownames
 
-# Tidying columns Temp, aquarium and larva with rownames
-mean_t1_12<-Map(cbind, mean_t1_12, group = names(mean_t1_12))
+# Tidying columns Temp, aquarium and larva.
 mean_t1_12<- list.rbind(mean_t1_12)
-mean_t1_12<-mean_t1_12 %>% separate(group, c("a", "B","C","D","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"))
-mean_t1_12<-mean_t1_12[,c(20,21,22,1,2,3)]
+mean_t1_12$larva<-c(1,2,2,3,3,3,3,4,4,4,5,5,5,5,1,1,2,2,3,3,3,4,4,4,5,1,2,2,2,4,5,5,5)
+mean_t1_12$aquarium<-c("A","A", "A", "A", "A", "A" ,"A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B","B", "B", "B", "B", "B", "B", "B", "C", "C", "C", "C", "C", "C", "C", "C")
+mean_t1_12$temp<-rep(12)
+mean_t1_12<-mean_t1_12[, c(6,5,4, 1, 2, 3)]
 colnames(mean_t1_12)<-c("Temp","aquarium","Larva","Trajectory","Time","IV")
 ```
 
@@ -791,10 +785,11 @@ mean_t1_15<-mean_t1_15[c(15:25)]
 names(mean_t1_15)<-list_of_files[15:25] #rownames
 
 # Tidying columns Temp, aquarium and larva with rownames
-mean_t1_15<-Map(cbind, mean_t1_15, group = names(mean_t1_15))
 mean_t1_15<- list.rbind(mean_t1_15)
-mean_t1_15<-mean_t1_15 %>% separate(group, c("a", "B","C","D","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"))
-mean_t1_15<-mean_t1_15[,c(19,20,21,1,2,3)]
+mean_t1_15$larva<-c(1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,5,5,1,1,1,1,1,2,2,2,2,2,2,2,3,1,2,2,2,2,2,3,3,5,5)
+mean_t1_15$aquarium<-c("A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C", "C", "C","C", "C", "C", "C", "C", "C", "C")
+mean_t1_15$temp<-rep(15)
+mean_t1_15<-mean_t1_15[, c(6,5,4, 1, 2, 3)]
 colnames(mean_t1_15)<-c("Temp","aquarium","Larva","Trajectory","Time","IV")
 ```
 
@@ -820,10 +815,11 @@ mean_t1_17<-mean_t1_17[c(26:39)]
 names(mean_t1_17)<-list_of_files[26:39] #rownames
 
 # Tidying columns Temp, aquarium and larva with rownames
-mean_t1_17<-Map(cbind, mean_t1_17, names = names(mean_t1_17))
-mean_t1_17<- list.rbind(mean_t1_17) 
-mean_t1_17<-mean_t1_17 %>% separate(names, c("a", "B","C","D","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"))
-mean_t1_17<-mean_t1_17[,c(19,20,21,1,2,3)]
+mean_t1_17<- list.rbind(mean_t1_17)
+mean_t1_17$larva<-c(1,1,1,1,2,2,2,2,3,3,3,4,4,4,5,5,5,2,2,3,3,3,3,3,3,3,3,3,3,4,4,5,5,5,5,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,4,4,4,5,5,5,5,5,5)
+mean_t1_17$aquarium<-c("A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B","B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C","C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C","C", "C", "C", "C", "C", "C", "C", "C")
+mean_t1_17$temp<-rep(17)
+mean_t1_17<-mean_t1_17[, c(6,5,4, 1, 2, 3)]
 colnames(mean_t1_17)<-c("Temp","aquarium","Larva","Trajectory","Time","IV")
 data<-rbind(mean_t1_12,mean_t1_15,mean_t1_17)
 ```
@@ -840,28 +836,29 @@ data1$Temp<-as.factor(data1$Temp)
 
 ```r
 #Median of instant velocity by temp
-medIV <- ddply(data1, "Temp", summarise, grp.med=median(Ist_Vel))
+medIV <- ddply(data1, "Temp", summarise, grp.med=median(Ist_Vel), Q1=quantile(Ist_Vel, c(0.25), type = 6),Q3=quantile(Ist_Vel, c(0.75), type = 6), IQR=Q3-Q1)
 print(medIV)
 ```
 
 ```
-##   Temp  grp.med
-## 1   12 5.138207
-## 2   15 1.769275
-## 3   17 1.568503
+##   Temp  grp.med       Q1       Q3      IQR
+## 1   12 5.138207 3.964596 8.341095 4.376499
+## 2   15 1.769275 1.411203 2.419496 1.008293
+## 3   17 1.568503 1.257316 2.711036 1.453720
 ```
 
 ```r
 #Median of max time swimming by temp
-medMax <- ddply(data1, "Temp", summarise, grp.med=median(Max_Time))
+medMax <- ddply(data1, "Temp", summarise, grp.med=median(Max_Time),
+Q1=quantile(Max_Time, c(0.25), type = 6),Q3=quantile(Max_Time, c(0.75), type = 6), IQR=Q3-Q1)
 print(medMax)
 ```
 
 ```
-##   Temp grp.med
-## 1   12   10.25
-## 2   15   18.80
-## 3   17   19.25
+##   Temp grp.med      Q1     Q3     IQR
+## 1   12   10.25  5.7675 18.590 12.8225
+## 2   15   18.80  9.0000 28.400 19.4000
+## 3   17   19.25 11.7000 27.125 15.4250
 ```
 
 ## 2. Kernel plots
@@ -1195,12 +1192,12 @@ p2<-ggplot(data1, aes(x=Temp, y=log(Max_Time), fill=Temp))+
   size=1,linetype="black") + 
   geom_jitter(color="black", size=0.6, alpha=0.3)+
   theme_classic() + theme(legend.position="none") +
-  labs(x="Temperature", y="MT")+
+  labs(x="Temperature", y="MTS")+
    scale_fill_manual(values =c("blue","darkorange", "red"))+
   geom_text(x=1.2,y=3,label="a",color="red")+
   geom_text(x=2.2,y=3.5,label="a",color="red")+
   geom_text(x=3.2,y=3.5,label="a",color="red")
-p2 + theme(text = element_text(size = 20))
+p2
 ```
 
 ![](Supp_data_1_files/figure-html/logMT_plot-1.png)<!-- -->
@@ -1215,7 +1212,7 @@ plot.with.inset.IV <-
   ggdraw() +
   draw_plot(dplot_IV) +
   draw_plot(p1, x = .49, y = 0.65, width = .3, height = .35)
-plot.with.inset.IV 
+plot.with.inset.IV
 ```
 
 ![](Supp_data_1_files/figure-html/Fig_4-1.png)<!-- -->
@@ -1236,6 +1233,6 @@ plot.with.inset.Max_Time
 
 ![](Supp_data_1_files/figure-html/Fig_5-1.png)<!-- -->
 
-*Fig 5. Kernel density plot of max time swimming by larvae (MT) with
+*Fig 5. Kernel density plot of max time swimming by larvae (MTS) with
 their median (triangle) by temperature, also with an inside boxplot that
-represents the logarithmic MT by temperature.*
+represents the logarithmic MTS by temperature.*
