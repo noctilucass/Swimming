@@ -1,0 +1,6 @@
+punta_espina_dorsal
+esq_izq_caparaza
+organo_dorsal
+
+
+

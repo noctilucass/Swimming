@@ -1,5 +1,5 @@
 ---
-title: Supplementary data 1
+title: "Code/data availability"
 subtitle: "Reproducible report"
 author: Lucas Bravo<sup>1</sup>, Milena Cano<sup>1</sup>, Mauricio F. Landaeta<sup>2,3</sup>, Sergio Navarrete<sup>4,5,6</sup>, Simone Baldanzi<sup>1,2</sup>
 output: 
@@ -21,27 +21,27 @@ Chile
 <sup>4</sup> Estación Costera de Investigaciones Marinas (ECIM),
 Pontificia Universidad Católica de Chile, Las Cruces, Chile.
 
-<sup>5</sup> Center for Applied Ecology and Sustainability (CAPES),
-COPAS COASTAL, Instituto Milenio en Socioecología Costera, SECOS,
-Pontificia Universidad Católica de Chile, Santiago, Chile.
+<sup>5</sup> Center for Applied Ecology and Sustainability (CAPES), and
+Instituto Milenio en Socioecología Costera, SECOS, Pontificia
+Universidad Católica de Chile, Santiago, Chile.
 
-<sup>6</sup> Center for Oceanographic Research COPAS Coastal, Universidad de Concepción, Chile 
-
-
+<sup>6</sup> Center for Oceanographic Research COPAS Coastal,
+Universidad de Concepción, Chile
 
 This document reproduces and supports all data work and statistical
 analysis of the larval survival, geometric morphometrics and swimming
-activity in the paper **"Assessing the effect of temperature variability
-on the swimming performance, survival and morphometrics of zoea larvae
-of the kelp crab *Taliepus dentatus*"**.
+activity in the paper **"The effects of acute temperature changes on the
+swimming performance, survival and morphometrics of zoea 1 larvae of the
+kelp crab (*Taliepus dentatus*) from Central Chile.**.
 
 # Libraries
 
 ```{r chunk_opt, include=FALSE}
-knitr::opts_chunk$set(dpi=300, message=FALSE, warning=FALSE, paged.print=FALSE)
+knitr::opts_chunk$set(dpi=600, message=FALSE, warning=FALSE, paged.print=FALSE)
+
 ```
 
-```{r libraries}
+```{r libraries, message=FALSE, warning=FALSE}
 #Mortality libraries
 library(cowplot)
 library(scales)
@@ -53,8 +53,6 @@ library(Rmisc)
 library(survminer)
 library(survival)
 library(MASS)
-library(here)
-
 
 #Morphometrics Libraries 
 library(Morpho)
@@ -78,12 +76,14 @@ library(emmeans)
 library(sjPlot)
 library(multcomp)
 library(rlist)
+
+cbPalette <- c("#3B4992FF","#008B45FF","#EE0000FF")
 ```
 
 # Timeseries of environmental temperature
 
 ```{r Timeseries_temp}
-montemar<-read.table(here("Montemar-minidot", "miniDOT.dat"))
+montemar<-read.table("~/Documents/GitHub/Swimming/data/timeseries/miniDOT.dat", header = FALSE)
 
 #MAKING DATETIME COLUMN and ADDING COLUMNS GROUPS
 montemar_date <- montemar %>%
@@ -121,8 +121,8 @@ ggplot(Day_temp, aes(x=Date, y=mean_temp)) + geom_point() + geom_line()+ theme_b
 ## 1. Import of data base and definition of factors
 
 ```{r mort_data}
-#data are available in the online version of the article, remember to import environment 
-Mort <- read.delim(here::here("mortality/mort.txt"))
+#data are available in the online version of the article, write your own filepath
+Mort<-read.delim("~/Documents/GitHub/Swimming/data/mortality/mort.txt")
 Mort$bino<-Mort$alive/100
 
 #Temperature as factor
@@ -203,9 +203,9 @@ summary(sfit)
 #Ploting Kaplan-meier results
 ggsurvplot(sfit, conf.int=TRUE, pval=TRUE, risk.table=FALSE, 
            legend.labs=c("12°C", "15°C","17°C"),
-           legend.title="Temperature",  
-           palette=(c("blue", "orange", "red")), 
-           risk.table.height=.15, ylab="Survival", xlab="Day")
+           legend.title="Temperature", 
+           risk.table.height=.15, ylab="Survival", xlab="Day", palette = cbPalette, font.x=9, font.y=9, font.tickslab=8,font.legend=9, break.x.by=1, pval.size=3,legend="right")
+ggsave("/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/ZoeaSurv.pdf",dpi = 600, width = 2800, height = 1900, units = "px")
 
 ```
 
@@ -214,172 +214,206 @@ their confidence interval (shaded color)*
 
 ------------------------------------------------------------------------
 
-# Geometric Morphometrics
+# Geometric Morphometrics and Distance-Base Analysis.
 
-##Digitizing
+## Digitizing
 
 ```{r digi_data}
 curve.v1<- c("organo_dorsal","esq_izq_caparaza")
 curve.v2<- c("punta_espina_dorsal","punta_espina_dorsal")
 curve.v3<- c("curvaD_espina_dorsal","curvaI_espina_dorsal")
 curve<- matrix(c(curve.v3,curve.v2, curve.v1), ncol = 3)
+
 # take-off "#" of the digitizeimages function in order to visualize each picture digitalization on rmarkdown. 
-#digitizeImages(image.file="morphometric larva/ZOEA1_FOTOS/12°C", landmarks.ref="morphometric larva/landmarks.txt", curves.ref = curve, shapes.file ="morphometric larva/zoea1")
-#digitizeImages(image.file="morphometric larva/ZOEA1_FOTOS/15°C", landmarks.ref="morphometric larva/landmarks.txt", curves.ref = curve, shapes.file ="morphometric larva/zoea1")
-#digitizeImages(image.file="morphometric larva/ZOEA1_FOTOS/17°C", landmarks.ref="morphometric larva/landmarks.txt", curves.ref = curve, shapes.file ="morphometric larva/zoea1")
+
+#digitizeImages(image.file="data/morphometrics/ZOEA1_FOTOS/12°C", landmarks.ref="data/morphometrics/landmarks.txt", curves.ref = curve, shapes.file ="data/morphometrics/zoea1")
+#digitizeImages(image.file="data/morphometrics/ZOEA1_FOTOS/15°C", landmarks.ref="data/morphometrics/landmarks.txt", curves.ref = curve, shapes.file ="data/morphometrics/zoea1")
+#digitizeImages(image.file="data/morphometrics/ZOEA1_FOTOS/17°C", landmarks.ref="data/morphometrics/landmarks.txt", curves.ref = curve, shapes.file ="data/morphometrics/zoea1")
+
+#digitizeImages(image.file="data/morphometrics/ZOEA8_FOTOS/12°C", landmarks.ref="data/morphometrics/landmarks.txt", curves.ref = curve, shapes.file ="data/morphometrics/zoea8")
+#digitizeImages(image.file="data/morphometrics/ZOEA8_FOTOS/15°C", landmarks.ref="data/morphometrics/landmarks.txt", curves.ref = curve, shapes.file ="data/morphometrics/zoea8")
+#digitizeImages(image.file="data/morphometrics/ZOEA8_FOTOS/17°C", landmarks.ref="data/morphometrics/landmarks.txt", curves.ref = curve, shapes.file ="data/morphometrics/zoea8")
+
 ```
 
 ## 1. Import Digitized pictures, grouping files and links for landmarks
 
 ```{r geom_data}
-#data are available in the online version of the article, remember to import environment 
-DIGIDAT<-readShapes(here::here("morphometric/zoea1"))
+zoea1<-readShapes("~/Documents/GitHub/Swimming/data/morphometrics/zoea1")
+zoea8<-readShapes("~/Documents/GitHub/Swimming/data/morphometrics/zoea8")
 
-# Telling R the database is from steremorph
-array_data<-readland.shapes(DIGIDAT, nCurvePts= c(7,7))
+array_data_zoea1<-readland.shapes(zoea1, nCurvePts= c(7,7))
+array_data_zoea8<-readland.shapes(zoea8, nCurvePts= c(7,7))
 
-# Importing traits
-traitF<- read_delim("/Users/lucasb/Desktop/ECOLAB!/paper tesis/morphometric larva/trait1.txt", 
-                    delim = "\t", escape_double = FALSE, 
-                    trim_ws = TRUE)
-head(traitF)
+trait1<- read_delim("~/Documents/GitHub/Swimming/data/morphometrics/trait1.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
+trait8<- read_delim("~/Documents/GitHub/Swimming/data/morphometrics/trait8.txt", delim = "\t", escape_double = FALSE, trim_ws = TRUE)
 
-# assigning columns as factors
-traitF$Temp<- as.factor(traitF$Temp)
-traitF$Replica<-as.factor(traitF$Replica)
-traitF$Day<-as.factor(traitF$Day)
 
-# importing file linksgeo to create lines connections between landmarks and semilandmarks
-linksgeo <- read_delim("/Users/lucasb/Desktop/ECOLAB!/paper tesis/morphometric larva/links.txt", delim = "\t", 
-                    escape_double = FALSE, col_names = FALSE, 
-                    trim_ws = TRUE)
+linkscva<-list(c(1,8:8,9:9,10:10,11:11,12:12,7),c(3,5:4,5:4,6:6,3),c(1,13:13,14:14,15:15,16:16,17:17,2))
+linksgeo <- read_delim("~/Documents/GitHub/Swimming/data/morphometrics/links.txt", delim = "\t", 
+                       escape_double = FALSE, col_names = FALSE, 
+                       trim_ws = TRUE)
 linksgeo<-as.matrix(linksgeo)
+trait1$Temp<- as.factor(trait1$Temp)
+trait1$Replica<-as.factor(trait1$Replica)
+trait1$Dia<-as.factor(trait1$Dia)
+trait8$Temp<- as.factor(trait8$Temp)
+trait8$Replica<-as.factor(trait8$Replica)
+trait8$Dia<-as.factor(trait8$Dia)
+
 ```
 
-## 2. Generalized Procrustes Analysis (GPA)
+## 2. Distance of the Spine length.
+
+```{r spine_plot}
+# Classic measure, dorsal spinal distance 
+zoea_DSpine <- c()
+for(i in 1:length(array_data_zoea1[["landmarks"]])){
+  r <- sum(distancePointToPoint(array_data_zoea1[["landmarks"]][[i]][1,],array_data_zoea1[["landmarks"]][[i]][4,]),
+           distancePointToPoint(array_data_zoea1[["landmarks"]][[i]][4,],array_data_zoea1[["landmarks"]][[i]][5,]),
+           distancePointToPoint(array_data_zoea1[["landmarks"]][[i]][5,],array_data_zoea1[["landmarks"]][[i]][6,]),
+           distancePointToPoint(array_data_zoea1[["landmarks"]][[i]][6,],array_data_zoea1[["landmarks"]][[i]][7,]))
+  zoea_DSpine <- c(zoea_DSpine,r)
+}
+
+
+zoea1_DSpine <- data.frame(zoea_DSpine, trait1)
+
+
+zoea_DSpine <- c()
+for(i in 1:length(array_data_zoea8[["landmarks"]])){
+  r <- sum(distancePointToPoint(array_data_zoea8[["landmarks"]][[i]][1,],array_data_zoea8[["landmarks"]][[i]][4,]),
+           distancePointToPoint(array_data_zoea8[["landmarks"]][[i]][4,],array_data_zoea8[["landmarks"]][[i]][5,]),
+           distancePointToPoint(array_data_zoea8[["landmarks"]][[i]][5,],array_data_zoea8[["landmarks"]][[i]][6,]),
+           distancePointToPoint(array_data_zoea8[["landmarks"]][[i]][6,],array_data_zoea8[["landmarks"]][[i]][7,]))
+  zoea_DSpine <- c(zoea_DSpine,r)
+}
+zoea8_DSpine <- data.frame(zoea_DSpine, trait8)
+
+zoea_DSpine_F <- rbind(zoea1_DSpine,zoea8_DSpine)
+
+zoea_DSpine_F <- zoea_DSpine_F %>% group_by(Dia,Temp,Replica) %>% dplyr::summarise(zoea_DSpine_mean=mean(zoea_DSpine),zoea_DSpine_sd=sd(zoea_DSpine))
+
+ggplot(zoea_DSpine_F, aes(x=Temp, y=zoea_DSpine_mean, fill=Dia)) + geom_boxplot()+ theme_classic() + labs(x="Temperature (°C)", y="Dorsal spine length (mm)", fill="Day") + scale_fill_aaas() + theme(text = element_text(size = 7))
+
+```
+
+## 3. Generalized Procrustes Analysis (GPA)
 
 ```{r GPA}
-#Generalized Procrustes Analysis
-GPA<- gpagen(array_data,ProcD=FALSE, print.progress = FALSE, curves=array_data$curves) 
-#procD=false, bending energy is the correct criterion for optimizing the positions of semilandmarks
+GPA_zoea1<- gpagen(array_data_zoea1,ProcD=FALSE, print.progress = FALSE, curves = array_data_zoea1$curves) #procD=false, bending energy is the correct criterion for optimizing the positions of semilandmarks
+gdf_zoea1<- geomorph.data.frame(GPA_zoea1, Temp=trait1$Temp, horas= trait1$Horas, replica=trait1$Replica, Dia=trait1$Dia)
+summary(GPA_zoea1)
 
-gdf<- geomorph.data.frame(GPA, Temp=traitF$Temp, replica=traitF$Replica)
+GPA_zoea8<- gpagen(array_data_zoea8,ProcD=FALSE, print.progress = FALSE, curves = array_data_zoea8$curves) #procD=false, bending energy is the correct criterion for optimizing the positions of semilandmarks
+gdf_zoea8<- geomorph.data.frame(GPA_zoea8, Temp=trait8$Temp, horas= trait8$Horas, replica=trait8$Replica, Dia=trait8$Dia)
+summary(GPA_zoea8)
+
+plotAllSpecimens(GPA_zoea1$coords, links = linksgeo, plot.param = list(txt.cex = 1.5, txt.col = "#D53E4F", pt.bg = "#BDBDBD", link.col = "black", mean.bg = "black"))
+mzoea1 <- mshape(GPA_zoea1$coords)
+plot(mzoea1, links = linksgeo)
+plotAllSpecimens(GPA_zoea8$coords, links = linksgeo, plot.param = list(txt.cex = 1.5, txt.col = "#D53E4F", pt.bg = "#BDBDBD", link.col = "black", mean.bg = "black"))
+mzoea8 <- mshape(GPA_zoea8$coords)
+plot(mzoea8, links = linksgeo)
 ```
 
-## 3. Principal Components Analysis (PCA)
+## 4. Principal Components Analysis (PCA)
 
 ```{r PCA}
-# Mean shape of all the individuals and adding links and numbers for each landmark and semilandmark
-msh <- mshape(GPA$coords)
-plot(msh, links = linksgeo)
+PCA_zoea1<-gm.prcomp(GPA_zoea1$coords)
+df_zoea1 <- as.data.frame(PCA_zoea1$x)
+df_zoea1 <- data_frame(df_zoea1, trait1)
+df_zoea1 <- df_zoea1 %>% group_by(Temp, Replica) %>% mutate(across(everything(),mean))
+pca_zoea1<-ggplot(data=df_zoea1, aes(x=Comp1, y=Comp2, col=df_zoea1$Temp)) + geom_point(size=3) + theme_classic() + labs(x="PC1=34%", y="PC2=20%", shape="Día", col="Temperature")+ scale_colour_manual(cbPalette)
+summaryPCA1<-summary(PCA_zoea1)
 
-# plot of all landmarks and semilandmarks digitized in grey and mean shape in black
-plotAllSpecimens(GPA$coords, links = linksgeo, plot.param = list(txt.cex = 1.5, txt.col = "#D53E4F", pt.bg = "#BDBDBD", link.col = "black", mean.bg = "black"))
+PCA_zoea8<-gm.prcomp(GPA_zoea8$coords)
+df_zoea8 <- as.data.frame(PCA_zoea8$x)
+df_zoea8 <- data_frame(df_zoea8, trait8)
+df_zoea8 <- df_zoea8 %>% group_by(Temp, Replica) %>% mutate(across(everything(),mean))
+pca_zoea8<-ggplot(data=df_zoea8, aes(x=Comp1, y=Comp2, col=df_zoea8$Temp)) + geom_point(size=3) + theme_classic() + labs(x="PC1=52%", y="PC2=15%", shape="Día", col="Temperature")+ scale_colour_aaas()
+summaryPCA8<-summary(PCA_zoea8)
 
-# Principal Components Analysis 
-PCA<-gm.prcomp(GPA$coords)
-summary(PCA)
+# Mean shape against max or minimun shape of Principal components
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc1max_zoea1.pdf", width = 4, height = 4)
+pc1max_zoea1 <- plotRefToTarget(mzoea1, PCA_zoea1$shapes$shapes.comp1$max,method =  "points", links = linksgeo)
+dev.off()
 
-# Principal components analysis by replica
-AnError<-procD.lm(coords~replica, data = gdf, iter = 999, RRPP = TRUE)
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc1min_zoea1.pdf", width = 4, height = 4)
+pc1min_zoea1 <- plotRefToTarget(mzoea1, PCA_zoea1$shapes$shapes.comp1$min,method = "points", links = linksgeo)
+dev.off()
 
-summary(AnError)
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc2max_zoea1.pdf", width = 4, height = 4)
+pc2max_zoea1 <- plotRefToTarget(mzoea1, PCA_zoea1$shapes$shapes.comp2$max,method =  "points", links = linksgeo)
+dev.off()
 
-(0.0127297/0.0138194)*100
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc2min_zoea1.pdf", width = 4, height = 4)
+pc2min_zoea1 <- plotRefToTarget(mzoea1, PCA_zoea1$shapes$shapes.comp2$min,method = "points", links = linksgeo)
+dev.off()
 
-# Error explained by miss-digitazion (%)
-(0.0010897/0.0138194)*100 
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc1max_zoea8.pdf", width = 4, height = 4)
+pc1max_zoea8 <- plotRefToTarget(mzoea8, PCA_zoea8$shapes$shapes.comp1$max,method =  "points", links = linksgeo)
+dev.off()
+
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc1min_zoea8.pdf", width = 4, height = 4)
+pc1min_zoea8 <- plotRefToTarget(mzoea8, PCA_zoea8$shapes$shapes.comp1$min,method = "points", links = linksgeo)
+dev.off()
+
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc2max_zoea8.pdf", width = 4, height = 4)
+pc2max_zoea8 <- plotRefToTarget(mzoea8, PCA_zoea8$shapes$shapes.comp2$max,method =  "points", links = linksgeo)
+dev.off()
+
+pdf(file = "/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/pc2min_zoea8.pdf", width = 4, height = 4)
+pc2min_zoea8 <- plotRefToTarget(mzoea8, PCA_zoea8$shapes$shapes.comp2$min,method = "points", links = linksgeo)
+dev.off()
+
 
 ```
 
-```{r PC1-2_plot}
-# Taking out PCA coordinates to create a plot with ggplot
-df_out <- as.data.frame(PCA$x)
 
-# ggplot for the PC1 and PC2
-PCA1<-ggplot(data=df_out, aes(x=Comp1, y=Comp2, col=
-                          gdf$Temp)) + geom_point(size=3, show.legend = FALSE) + theme_light() + labs(x="PC1=34.4%", y="PC2=20.6%") + scale_color_manual(values =c("blue","orange", "red"))
-PCA1
-```
-
-*Fig 3a. First (PC1) and second (PC2) principal components distribution
-with their explained variance (%)*
-
-```{r Shp_plot_pc1-2, eval=FALSE}
-# Plots of the mean shape (grey) against mínimum shape (black) of PC1 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp1$min, method =  "points", 
-                links = linksgeo)
-
-# Plots of the mean shape (grey) against maximum shape (black) of PC1 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp1$max,method = "points", 
-                links = linksgeo)
-
-# Plots of the mean shape (grey) against mínimum shape (black) of PC2 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp2$min, method =  "points", 
-                links = linksgeo)
-
-# Plots of the mean shape (grey) against maximum shape (black) of PC2 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp2$max,method = "points", 
-                links = linksgeo)
-```
-
-```{r PC1-3_plot}
-# ggplot for the PC1 and PC3
-PCA2<-ggplot(data=df_out, aes(x=Comp1, y=Comp3, col=
-      gdf$Temp))+geom_point(size=3) + theme_light() +
-  labs(x="PC1=34.4%", y="PC3=14.6%", shape="Day", col="Temperature")+ scale_color_manual(values =c("blue", "orange", "red"))
-PCA2
-```
-
-*Fig 3b. First (PC1) and second (PC3) principal components distribution
-with their explained variance (%)*
-
-```{r Shp_plot_pc1-3, eval=FALSE}
-# Plots of the mean shape (grey) against mínimum shape (black) of PC1 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp1$min, method =  "points",
-                links = linksgeo)
-
-# Plots of the mean shape (grey) against maximum shape (black) of PC1 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp1$max,method = "points",
-                links = linksgeo)
-
-# Plots of the mean shape (grey) against mínimum shape (black) of PC3 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp3$min, method =  "points",
-                links = linksgeo)
-
-# Plots of the mean shape (grey) against maximum shape (black) of PC3 (with default magnification=1)
-plotRefToTarget(msh, PCA$shapes$shapes.comp3$max,method = "points",
-                links = linksgeo)
-```
-
-## 4. Canonical Variance Analysis (CVA)
+## 5. Canonical Variance Analysis (CVA)
 
 ```{r CVA}
+
 # Column to the Database to later use as grouping
-traitF$grouppp<-paste(traitF$Temp, traitF$Day)
+trait1$grouppp<-paste(trait1$Temp, trait1$Day)
+trait8$grouppp<-paste(trait8$Temp, trait8$Day)
 
 # Canonical variance analysis using bonferroni p-value adjustment 
-cva1<-CVA(GPA$coords, groups = traitF$Temp, p.adjust.method = "bonferroni",rounds = 1000, robust = "classical")
+cva1<-CVA(GPA_zoea1$coords, groups = trait1$Temp, p.adjust.method = "bonferroni",rounds = 9999, robust = "classical")
+cva8<-CVA(GPA_zoea8$coords, groups = trait8$Temp, p.adjust.method = "bonferroni",rounds = 9999, robust = "classical")
 
-# P-values (euclides) obtained between groups
+# P-values (euclides) obtained between groups of permutation test (9999)
 (cva1[["Dist"]][["probsEuclid"]])
+(cva8[["Dist"]][["probsEuclid"]])
 
-# Procrustes distances (euclides) between groups
-(cva1[["Dist"]][["GroupdistEuclid"]])
+Cva_out_1<-as.data.frame(cva1$CVscores)
+consensus_1<-as.data.frame(cva1$groupmeans)
+Cva_out_1$temp<-gdf_zoea1$Temp
+cva1_plot <- ggplot(data=Cva_out_1, aes(x=`CV 1`, y=`CV 2`, col=temp)) + geom_point() + stat_ellipse(level = 0.95) + coord_fixed() +
+  labs(x="CV 1", y= "CV 2", col= "Temperature") + theme_classic() + scale_colour_manual(values=cbPalette)
 
-Cva_out<-as.data.frame(cva1$CVscores)
-consensus<-as.data.frame(cva1$groupmeans)
-Cva_out$temp<-gdf$Temp
+Cva_out_8<-as.data.frame(cva8$CVscores)
+consensus_8<-as.data.frame(cva8$groupmeans)
+Cva_out_8$temp<-gdf_zoea8$Temp
+cva8_plot <-ggplot(data=Cva_out_8, aes(x=`CV 1`, y=`CV 2`, col=temp)) + geom_point() + stat_ellipse(level = 0.95) + coord_fixed() +
+  labs(x="CV 1", y= "CV 2", col= "Temperature") + theme_classic() + scale_colour_manual(values=cbPalette)
 
-ggplot(data=Cva_out, aes(x=`CV 1`, y=`CV 2`, col=temp)) + geom_point() + stat_ellipse(level = 0.95) + coord_fixed() +
-labs(x="Canonical variable 1 (76.4%)", y= "Canonical variable 2 (23.6%)", col= "Temperature") + theme_classic() + scale_color_manual(values =c("blue", "orange", "red"), labels=c("12°C","15°C","17°C"))
+shapiro.test(zoea_DSpine_F$zoea_DSpine_mean[zoea_DSpine_F$Temp==12 & zoea_DSpine_F$Dia==1])
+shapiro.test(zoea_DSpine_F$zoea_DSpine_mean[zoea_DSpine_F$Temp==15 & zoea_DSpine_F$Dia==1])
+shapiro.test(zoea_DSpine_F$zoea_DSpine_mean[zoea_DSpine_F$Temp==17 & zoea_DSpine_F$Dia==1])
 
-plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,1], method ="points", links = linksgeo, axes = TRUE, label = FALSE, gridPars = gridPar(tar.pt.bg = "blue", tar.link.col="blue",tar.link.lwd=2, link.col = "grey", pt.bg = "grey", link.lwd = 2, pt.size = 1, tar.pt.size = 1.5))
+shapiro.test(zoea_DSpine_F$zoea_DSpine_mean[zoea_DSpine_F$Temp==12 & zoea_DSpine_F$Dia==8])
+shapiro.test(zoea_DSpine_F$zoea_DSpine_mean[zoea_DSpine_F$Temp==15 & zoea_DSpine_F$Dia==8])
+shapiro.test(zoea_DSpine_F$zoea_DSpine_mean[zoea_DSpine_F$Temp==17 & zoea_DSpine_F$Dia==8])
 
-plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,2], method ="points", links = linksgeo, axes = TRUE, label = FALSE, gridPars = gridPar(tar.pt.bg = "orange", tar.link.col="orange",tar.link.lwd=2, link.col = "grey", pt.bg = "grey", link.lwd = 2, pt.size = 1, tar.pt.size = 1.5))
+mod1 <- aov(zoea_DSpine_mean~Temp*Dia, data = zoea_DSpine_F)
+anova(mod1)
 
-plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,3], method ="points", links = linksgeo, axes = TRUE, label = FALSE, gridPars = gridPar(tar.pt.bg = "red", tar.link.col="red",tar.link.lwd=2, link.col = "grey", pt.bg = "grey", link.lwd = 2, pt.size = 1, tar.pt.size = 1.5))
+posteriori<- TukeyHSD(mod1, which = "Temp:Dia")
+posteriori[["Temp:Dia"]][,4]<0.05
 
+plot(posteriori)
 ```
 
 ------------------------------------------------------------------------
@@ -389,8 +423,8 @@ plotRefToTarget(cva1[["Grandm"]], cva1[["groupmeans"]][,,3], method ="points", l
 ## 1. Import database and Tyding
 
 ```{r swimm_data}
-#data are available in the online version of the article, remember to import environment 
-list_of_files <- list.files(path = here::here("swimming R/NEW TRIAL/data"), recursive = TRUE,pattern = "\\.txt$", full.names = TRUE)
+#data are available in the online version of the article, write your own filepath
+list_of_files <- list.files(path = "~/Documents/GitHub/Swimming/data/swimming", recursive = TRUE,pattern = "\\.txt$", full.names = TRUE)
 
 #Lapply allows to import all the files in one list
 loop_full<-lapply(list_of_files, read.delim2)
@@ -417,12 +451,11 @@ mean_t1_12[[i]]<-z1
 }
 names(mean_t1_12)<-list_of_files[1:14] #rownames
 
-# Tidying columns Temp, aquarium and larva.
+# Tidying columns Temp, aquarium and larva with rownames
+mean_t1_12<-Map(cbind, mean_t1_12, group = names(mean_t1_12))
 mean_t1_12<- list.rbind(mean_t1_12)
-mean_t1_12$larva<-c(1,2,2,3,3,3,3,4,4,4,5,5,5,5,1,1,2,2,3,3,3,4,4,4,5,1,2,2,2,4,5,5,5)
-mean_t1_12$aquarium<-c("A","A", "A", "A", "A", "A" ,"A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B","B", "B", "B", "B", "B", "B", "B", "C", "C", "C", "C", "C", "C", "C", "C")
-mean_t1_12$temp<-rep(12)
-mean_t1_12<-mean_t1_12[, c(6,5,4, 1, 2, 3)]
+mean_t1_12<-mean_t1_12 %>% separate(group, c("a", "B","C","D","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"))
+mean_t1_12<-mean_t1_12[,c(16,17,18,1,2,3)]
 colnames(mean_t1_12)<-c("Temp","aquarium","Larva","Trajectory","Time","IV")
 ```
 
@@ -447,11 +480,10 @@ mean_t1_15<-mean_t1_15[c(15:25)]
 names(mean_t1_15)<-list_of_files[15:25] #rownames
 
 # Tidying columns Temp, aquarium and larva with rownames
+mean_t1_15<-Map(cbind, mean_t1_15, group = names(mean_t1_15))
 mean_t1_15<- list.rbind(mean_t1_15)
-mean_t1_15$larva<-c(1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,5,5,1,1,1,1,1,2,2,2,2,2,2,2,3,1,2,2,2,2,2,3,3,5,5)
-mean_t1_15$aquarium<-c("A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C", "C", "C","C", "C", "C", "C", "C", "C", "C")
-mean_t1_15$temp<-rep(15)
-mean_t1_15<-mean_t1_15[, c(6,5,4, 1, 2, 3)]
+mean_t1_15<-mean_t1_15 %>% separate(group, c("a", "B","C","D","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"))
+mean_t1_15<-mean_t1_15[,c(15,16,17,1,2,3)]
 colnames(mean_t1_15)<-c("Temp","aquarium","Larva","Trajectory","Time","IV")
 ```
 
@@ -476,11 +508,10 @@ mean_t1_17<-mean_t1_17[c(26:39)]
 names(mean_t1_17)<-list_of_files[26:39] #rownames
 
 # Tidying columns Temp, aquarium and larva with rownames
-mean_t1_17<- list.rbind(mean_t1_17)
-mean_t1_17$larva<-c(1,1,1,1,2,2,2,2,3,3,3,4,4,4,5,5,5,2,2,3,3,3,3,3,3,3,3,3,3,4,4,5,5,5,5,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,4,4,4,5,5,5,5,5,5)
-mean_t1_17$aquarium<-c("A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "B","B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "C","C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C","C", "C", "C", "C", "C", "C", "C", "C")
-mean_t1_17$temp<-rep(17)
-mean_t1_17<-mean_t1_17[, c(6,5,4, 1, 2, 3)]
+mean_t1_17<-Map(cbind, mean_t1_17, names = names(mean_t1_17))
+mean_t1_17<- list.rbind(mean_t1_17) 
+mean_t1_17<-mean_t1_17 %>% separate(names, c("a", "B","C","D","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s"))
+mean_t1_17<-mean_t1_17[,c(15,16,17,1,2,3)]
 colnames(mean_t1_17)<-c("Temp","aquarium","Larva","Trajectory","Time","IV")
 data<-rbind(mean_t1_12,mean_t1_15,mean_t1_17)
 ```
@@ -508,16 +539,17 @@ print(medMax)
 ```{r Kernel_IV}
 #Non-parametric Kernel Densities plot for instant velocity (IV)
 dplot_IV<-ggplot(data1, aes(Ist_Vel, color=Temp))+
-  geom_density(kernel = "gaussian")+
-  geom_point(aes(x=5.13, y=0),colour="blue",shape=17, size=6)+
-  geom_point(aes(x=1.76, y=0),colour="orange",shape=17, size=6)+
-  geom_point(aes(x=1.56, y=0),colour="red",shape=17, size=6)+
+  geom_density(kernel = "gaussian")+ 
+  geom_point(aes(x=5.13, y=0),colour="#3B4992FF",shape=17, size=7)+
+  geom_point(aes(x=1.76, y=0),colour="#008B45FF",shape=17, size=7)+
+  geom_point(aes(x=1.56, y=0),colour="#EE0000FF",shape=17, size=7)+
   theme_classic()+ 
-  labs(colour="Temperature", x="Instant Velocity (mm/s)", y="Kernel density")+ 
-  scale_x_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1))) +
-  scale_y_continuous(limits = c(0, NA),expand = expansion(mult = c(0, 0.1))) +
-  theme(axis.title = element_text(size = 20),axis.text = element_text(size = 20)) +
-  scale_colour_manual(values =c("blue","darkorange", "red"))
+  labs(colour="Temperature (°C)", x="Instant Velocity (mm/s)", y="Kernel density")+ 
+  scale_x_continuous(limits = c(0, NA),breaks = 0:10, expand = expansion(mult = c(0, 0.1))) +
+  scale_y_continuous(limits = c(0, NA),breaks =seq(from=0,to=1, by=0.1),
+expand = expansion(mult = c(0, 0.1))) +
+  theme(text = element_text(size = 10)) +
+  scale_colour_manual(values=cbPalette)
 dplot_IV
 ```
 
@@ -528,15 +560,15 @@ dplot_IV
 #Non-parametric Kernel Densities plot for max time swimming (MT)
 dplot_Max<-ggplot(data1, aes(Max_Time, color=Temp))+
   geom_density(kernel="gaussian")+
-  geom_point(aes(x=10.25, y=0),color="blue",shape=17, size=6)+
-  geom_point(aes(x=18.80, y=0),color="orange",shape=17, size=6)+
-  geom_point(aes(x=19.25, y=0),color="red",shape=17, size=6)+
+  geom_point(aes(x=10.25, y=0),color="#3B4992FF",shape=17, size=7)+
+  geom_point(aes(x=18.80, y=0),color="#008B45FF",shape=17, size=7)+
+  geom_point(aes(x=19.25, y=0),color="#EE0000FF",shape=17, size=7)+
   theme_classic()+
-  labs(colour="Temperature", x="Max Time Swimming (sec)", y="Kernel density")+ 
-  scale_x_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1))) +
-  scale_y_continuous(limits = c(0, NA),expand = expansion(mult = c(0, 0.1))) +
-  theme(axis.title = element_text(size = 20),axis.text = element_text(size = 20)) +
-  scale_color_manual(values =c("blue","darkorange", "red"))
+  labs(colour="Temperature (°C)", x="Max Time Swimming (sec)", y="Kernel density")+ 
+  scale_x_continuous(limits = c(0, NA),breaks = seq(from=0,to=50,by=5),expand = expansion(mult = c(0, 0.1))) +
+  scale_y_continuous(limits = c(0, NA),breaks = seq(from=0,to=0.06,by=0.01),expand = expansion(mult = c(0, 0.1))) +
+  theme(text = element_text(size = 10)) +
+  scale_colour_manual(values = cbPalette)
 dplot_Max
 ```
 
@@ -592,21 +624,23 @@ meansMax<-emmeans(modMax, pairwise ~ Temp, adjust="bonferroni")
 meansMax
 ```
 
+## 5. Plots
+
 ```{r logIV_plot}
 #Boxplot of logaritmic IV data 
-p1<-ggplot(data1, aes(x=Temp, y=log(Ist_Vel), fill=Temp))+geom_boxplot()+
+p1<-ggplot(data1, aes(x=Temp, y=log(Ist_Vel), fill=Temp))+geom_boxplot(outliers = F)+
   stat_summary(fun.y =mean,geom="point",width=0.75,
   size=1,linetype="black") +
   geom_jitter(color="black", size=0.6, alpha=0.3)+
-  theme_classic()+labs(x="Temperature", y="IV")+theme(legend.position="none")+
-   scale_fill_manual(values =c("blue","darkorange", "red"))+ 
-  scale_y_continuous(breaks =c(1,2,0))+  geom_text(x=1.2,y=2.3,label="a",color="red")+
-  geom_text(x=2.2,y=1.3,label="b",color="red")+
-  geom_text(x=3.2,y=1.3,label="b",color="red")
+  theme_classic()+labs(x="Temperature (°C)", y="IV")+theme(legend.position="none",text= element_text(size=10))+
+   scale_fill_manual(values = cbPalette)+ 
+  scale_y_continuous(breaks =c(1,2,0))+  geom_text(x=1.2,y=2.4,label="a",color="red", size = 3)+
+  geom_text(x=2.2,y=1.4,label="b",color="red", size = 3)+
+  geom_text(x=3.2,y=1.4,label="b",color="red", size = 3)
 p1
 ```
 
-*Boxplot that represents logarithmic IV distribution of the data by
+*Boxplot that represents logarithmic AIV distribution of the data by
 temperature, letters indicate significant difference.*
 
 ```{r logMT_plot}
@@ -615,43 +649,40 @@ p2<-ggplot(data1, aes(x=Temp, y=log(Max_Time), fill=Temp))+
   geom_boxplot()+ stat_summary(fun.y =mean,geom="point",width=0.75,
   size=1,linetype="black") + 
   geom_jitter(color="black", size=0.6, alpha=0.3)+
-  theme_classic() + theme(legend.position="none") +
-  labs(x="Temperature", y="MTS")+
-   scale_fill_manual(values =c("blue","darkorange", "red"))+
-  geom_text(x=1.2,y=3,label="a",color="red")+
-  geom_text(x=2.2,y=3.5,label="a",color="red")+
-  geom_text(x=3.2,y=3.5,label="a",color="red")
+  theme_classic() + theme(legend.position="none",text= element_text(size=10)) +
+  labs(x="Temperature (°C)", y="MTS")+
+   scale_fill_manual(values=cbPalette)+
+  geom_text(x=1.2,y=3.2,label="a",color="red",size = 3)+
+  geom_text(x=2.2,y=3.7,label="a",color="red",size = 3)+
+  geom_text(x=3.2,y=3.7,label="a",color="red",size = 3)+ scale_y_continuous(breaks = 0:4)
 p2
 
 ```
 
-*Boxplot that represents logarithmic MT distribution of the data by
+*Boxplot that represents logarithmic MTS distribution of the data by
 temperature, letters indicate significant difference.*
 
-```{r Fig_4}
+```{r IV_plot}
 #kernel density plot with inset boxplot of IV
 plot.with.inset.IV <-
   ggdraw() +
   draw_plot(dplot_IV) +
-  draw_plot(p1, x = .49, y = 0.65, width = .3, height = .35)
+  draw_plot(p1, x = .35, y = 0.65, width = .3, height = .35)
 plot.with.inset.IV
+ggsave("/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/IVKernel.pdf",dpi = 600, width = 2800, height = 1900, units = "px")
 
 ```
 
-*Fig 4. Kernel density plot of instant velocity swimming by larvae (IV)
-with their median (triangle) by temperature, also with an inside boxplot
-that represents the logarithmic IV by temperature.*
 
-```{r Fig_5}
+```{r MT_plot}
 #kernel density plot with inset boxplot of MT
 plot.with.inset.Max_Time <-
   ggdraw() +
   draw_plot(dplot_Max) +
-  draw_plot(p2, x = .49, y = 0.65, width = .3, height = .35)
+  draw_plot(p2, x = .35, y = 0.65, width = .3, height = .35)
 plot.with.inset.Max_Time
+ggsave("/Users/lucasb/Desktop/ECOLAB!/paper tesis/FIGURES PAPER/plots R/MTSKernel.pdf",dpi = 600, width = 2500, height = 1900, units = "px")
+
 
 ```
 
-*Fig 5. Kernel density plot of max time swimming by larvae (MTS) with
-their median (triangle) by temperature, also with an inside boxplot that
-represents the logarithmic MTS by temperature.*
