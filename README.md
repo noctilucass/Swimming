@@ -2,4 +2,5 @@
 
 The code and data provided here will allow anyone to reproduce the analyses and results described in
 
-> cite when published
+Bravo‐Guzmán, L., Cano, M., Landaeta, M.F., Navarrete, S.A. & Baldanzi, S. (2025) ‘The Effects of Temperature on the Swimming Performance, Starvation‐Survival and Morphometrics of Zoea 1 Larvae of the Kelp Crab ( Taliepus dentatus ) From Central Chile’, Austral ecology., 50(5), .
+
